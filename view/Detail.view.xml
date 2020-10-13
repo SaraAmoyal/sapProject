@@ -1,0 +1,131 @@
+<mvc:View
+controllerName="sap.ui.demo.fiori2.controller.Detail"
+ xmlns:core="sap.ui.core"
+xmlns:layout="sap.ui.layout"
+xmlns:mvc="sap.ui.core.mvc"
+xmlns:custom="apestech.ui.erp.controls"
+xmlns="sap.uxap" displayBlock="true" 
+	xmlns:semantic="sap.f.semantic"
+	xmlns:m="sap.m"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form">
+	<ObjectPageLayout
+	    height="50%"
+		id="ObjectPageLayout"
+		showTitleInHeaderContent="true"
+		alwaysShowContentHeader="false"
+		preserveHeaderStateOnScroll="false"
+		headerContentPinnable="true"
+		isChildPage="true"
+		upperCaseAnchorBar="false">
+		<headerTitle>
+			<ObjectPageDynamicHeaderTitle>
+			
+				<actions>
+					<m:ToggleButton
+						text="Edit"
+						type="Emphasized"
+						press=".onEditToggleButtonPress"/>
+				</actions>
+			</ObjectPageDynamicHeaderTitle>
+		</headerTitle>
+		<sections>
+			<ObjectPageSection title="General Information">
+				<subSections>
+					<ObjectPageSubSection>
+						<blocks>
+							<form:SimpleForm
+								maxContainerCols="2"
+								editable="false"
+								layout="ResponsiveGridLayout"
+								labelSpanL="12"
+								labelSpanM="12"
+								emptySpanL="0"
+								emptySpanM="0"
+								columnsL="1"
+								columnsM="1">
+								<form:content>
+									<m:Label text="Purchase Order ID"/>
+									<m:Text id="ordNumber" text="{/titleLine}"/>
+									<m:Label text="Last Changed"/>
+									<m:Text id="custId" text="{/titleLine}"/>
+									<m:Label text="Cost"/>
+									<m:Text id="cost" text="{/titleLine}"/>
+								</form:content>
+							</form:SimpleForm>
+						</blocks>
+					</ObjectPageSubSection>
+				</subSections>
+			</ObjectPageSection>
+</sections>
+<footer>
+			<m:OverflowToolbar>
+				<m:ToolbarSpacer/>
+				<m:Button press="onApproveOrder" type="Accept" text="Approve"/>
+				<m:Button press="onRejectOrder" type="Reject" text="Reject"/>
+			</m:OverflowToolbar>
+		</footer>
+</ObjectPageLayout>
+<m:Page id="page" title="Items({view1>/deLen})">
+<m:ScrollContainer
+horizontal="true"
+vertical="true"
+focusable="true"
+>
+<m:Table
+ sticky="HeaderToolbar,InfoToolbar,ColumnHeaders"
+ id="idOrderLinesTable"
+		inset="false"
+		items="{
+			path: '/orderLinesSet',
+			sorter: {
+				path: 'Name'
+			}
+		}">
+		<m:Title text="Products" level="H2"/>
+		<m:columns>
+			<m:Column
+				width="12em">
+				<m:Text text="Product Number" />
+			</m:Column>
+			<m:Column
+				minScreenWidth="Tablet"
+				demandPopin="true">
+				<m:Text text="Price" />
+			</m:Column>
+			<m:Column
+				minScreenWidth="Desktop"
+				demandPopin="true"
+				hAlign="End">
+				<m:Text text="Amount" />
+			</m:Column>
+			
+			<m:Column
+				hAlign="End">
+				<m:Text text="Total" />
+			</m:Column>
+		</m:columns>
+		<m:items>
+			<m:ColumnListItem>
+				<m:cells>
+					<m:Text
+						text="{Product}" />
+					<m:ObjectNumber
+							number="{= parseFloat(${Price})
+								}"
+							unit="{CurrencyCode}" />
+					<m:ObjectNumber
+							number="{= parseFloat(${Amount})
+								}"
+							unit="{CurrencyCode}" />
+				    <m:ObjectNumber
+							number="{= parseFloat(${Gross})
+								}"
+							unit="{CurrencyCode}" />
+				</m:cells>
+			</m:ColumnListItem>
+		</m:items>
+		</m:Table>
+		</m:ScrollContainer>
+		</m:Page>
+</mvc:View>

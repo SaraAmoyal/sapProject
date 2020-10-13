@@ -1,0 +1,45 @@
+<mvc:View
+	controllerName="sap.ui.demo.fiori2.controller.App"
+	displayBlock="true"
+	height="100%"
+	xmlns="sap.f"
+	xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+	 xmlns:l="sap.ui.layout"
+	xmlns:semantic="sap.f.semantic">
+	<m:Shell id="shell">
+		<m:App id="app">
+			<m:pages>
+				<m:Page id="page" title="{Manage Purchase Orders}">
+					<m:content>
+						<m:IconTabBar id="idIconTabBarMulti"
+							expanded="{device>/isNoPhone}"
+							class="sapUiResponsiveContentPadding">
+							<m:items>
+								<m:IconTabFilter icon="sap-icon://warning"
+								iconColor="Critical"
+								  key="info">
+								  <FlexibleColumnLayout
+									id="flexibleColumnLayout"
+									stateChange=".onStateChanged"
+									backgroundDesign="Solid"
+									layout="{/layout}"/>
+								 </m:IconTabFilter>
+								<m:IconTabFilter icon="sap-icon://accept"
+								iconColor="Positive"
+									key="attachments" count="{view1>/conLen}">
+									  <mvc:XMLView viewName="sap.ui.demo.fiori2.view.confirmedOrders"/>
+								</m:IconTabFilter>
+								<m:IconTabFilter icon="sap-icon://decline" key="notes"
+								iconColor="Negative"
+									count="{view2>/conLen}">
+									<mvc:XMLView viewName="sap.ui.demo.fiori2.view.rejectedOrders"/>
+							</m:IconTabFilter>
+							</m:items>
+						</m:IconTabBar>
+					</m:content>
+				</m:Page>
+			</m:pages>
+		</m:App>
+	</m:Shell>
+</mvc:View>

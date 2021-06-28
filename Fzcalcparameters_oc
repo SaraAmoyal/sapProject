@@ -1,0 +1,169 @@
+FUNCTION ZCALCPARAMETERS_OC.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_ORDERNUMBER) TYPE  ZORDERNUM_OCA OPTIONAL
+*"  EXPORTING
+*"     VALUE(EX_EXPORT) TYPE  ZEXPORTCS_OCA
+*"----------------------------------------------------------------------
+
+
+DATA: itab TYPE HASHED TABLE OF ZPARAMETERS1_OC
+                WITH UNIQUE KEY MANDT PARCODE ORDNUM,
+      wa LIKE LINE OF itab.
+
+data: lv_percent type ZPARPERCENT_OC,
+      lv_basicinfo type ZBASICINFO_OC,
+      ls_line type ZSPARAMETERS_OC,
+      result TYPE LINE OF zexportcs_oca.
+
+result-isok = 1.
+
+CALL FUNCTION 'CALCCANCEL_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo.
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 105. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+
+CALL FUNCTION 'CALCSENIORITY_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo.
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 103. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+
+CALL FUNCTION 'ZCALCAMOUNTINMON_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo
+          .
+
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 100. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+
+
+
+CALL FUNCTION 'ZCALCBDI_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo.
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 104. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+
+
+
+CALL FUNCTION 'ZCALCCHANGESNUM_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo.
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 107. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+
+
+
+CALL FUNCTION 'ZCALCCOST_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo.
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 102. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+
+
+CALL FUNCTION 'ZCALCLINESNUM_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo.
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 101. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+
+
+CALL FUNCTION 'ZCALCTIME_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo.
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 108. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+
+CALL FUNCTION 'ZCALCTYPE_OC'
+ EXPORTING
+   IV_ORDERNUMBER       = IV_ORDERNUMBER
+ IMPORTING
+   EX_PERCENT           = lv_percent
+   EX_BASICINFO         = lv_basicinfo.
+
+if sy-subrc = 1.
+   result-isok = 0.
+ endif.
+ls_line-mandt = '001'. ls_line-parcode = 106. ls_line-ordnum = IV_ORDERNUMBER.
+ls_line-parpercent = lv_percent. ls_line-BASICINFO = lv_basicinfo.
+insert into ZPARAMETERS1_OC VALUES ls_line.
+
+ append result to EX_EXPORT.
+
+
+ENDFUNCTION.

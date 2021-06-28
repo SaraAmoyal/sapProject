@@ -1,0 +1,148 @@
+FUNCTION ZCALCAMOUNTINMON_OC.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_ORDERNUMBER) TYPE  ZORDERNUM_OCA OPTIONAL
+*"  EXPORTING
+*"     VALUE(EX_PERCENT) TYPE  ZPARPERCENT_OC
+*"     VALUE(EX_BASICINFO) TYPE  ZBASICINFO_OC
+*"----------------------------------------------------------------------
+
+DATA: BEGIN OF t_count OCCURS 6,
+  count TYPE I,
+END OF t_count.
+
+data: lv_sdate type d,
+      lv_edate type d,
+      lv_customer type string,
+      lv_mon type char10,
+      lv_avg type f,
+      lv_standarddeviation type f,
+      lv_sum type f,
+      lv_regulatoryGrade type f,
+      lv_30daysago type d,
+      lv_lastmon type f,
+      lv_year type char10,
+      lv_relevant type i,
+      lv_seniority type ZSENIORITY_OC.
+
+lv_avg = 0.
+lv_Standarddeviation = 0.
+lv_relevant = 1.
+lv_sdate = sy-datum.
+lv_edate = sy-datum.
+
+*get customerId
+select custid from zorder6_oc
+  into lv_customer
+  where ordernumber = iv_ordernumber.
+endselect.
+
+*get customer seniority
+select seniority from ZCUSTOMER_OC
+  into lv_seniority
+  where id eq lv_customer.
+  endselect.
+
+if lv_seniority <= 1.
+  EX_PERCENT = 18.
+  EX_BASICINFO = 0.
+else.
+
+*get the order date
+select ORDERDATE from zorder6_oc
+  into lv_30daysago
+  where ordernumber = iv_ordernumber.
+  endselect.
+
+* Get the month to calc from it (6 monthes ago)
+CALL FUNCTION 'ZGETSTARTMON_OC'
+ EXPORTING
+   IV_ZDATE       = lv_30daysago
+ IMPORTING
+   EV_YEAR        = lv_year
+   EV_MONTH       = lv_mon.
+
+
+lv_30daysago = lv_30daysago - 30.
+
+*Get the number of orders for the last month
+SELECT count(*)
+FROM zorder6_oc
+INTO lv_lastmon
+WHERE orderdate >= lv_30daysago and custid = lv_customer.
+
+
+*get orders numbers for 6 last monthes
+lv_sdate+6(2) = '01'.
+lv_edate+6(2) = '31'.
+lv_sdate+0(4) = lv_year.
+lv_edate+0(4) = lv_year.
+
+lv_mon = lv_mon - 1.
+
+do 6 times.
+
+lv_mon = lv_mon + 1.
+lv_sdate+4(2) = lv_mon.
+lv_edate+4(2) = lv_mon.
+
+if lv_mon eq '01'.
+  lv_year = ( conv int4( lv_year ) ) + 1.
+  lv_sdate+0(4) = lv_year.
+  lv_edate+0(4) = lv_year.
+  endif.
+
+select count(*)
+  from zorder6_oc
+  into @t_count-count
+  where orderdate >= @lv_sdate AND orderdate <= @lv_edate and custid = @lv_customer.
+
+
+  append t_count.
+enddo.
+
+
+* calc avarage
+LOOP AT t_count.
+  lv_avg = lv_avg + t_count-count.
+ENDLOOP.
+
+divide lv_avg by 6.
+if lv_avg < 1.
+  lv_relevant = 0.
+  endif.
+
+*	Calc standard deviation
+
+Loop at t_count.
+  lv_sum = t_count-count - lv_avg.
+  lv_sum = lv_sum ** 2.
+
+  lv_standarddeviation = lv_standarddeviation + lv_sum.
+Endloop.
+
+divide lv_standarddeviation  by 6.
+lv_standarddeviation = sqrt( lv_standarddeviation ).
+
+*Calc regulatory Grade
+
+lv_regulatoryGrade = lv_lastmon - lv_avg.
+if lv_standarddeviation ne 0.
+divide lv_regulatoryGrade by lv_standarddeviation.
+endif.
+
+
+if lv_regulatoryGrade > -2 and lv_regulatoryGrade < 2 or lv_relevant eq 0.
+  EX_PERCENT = 18.
+  elseif lv_regulatoryGrade > 2 and lv_regulatoryGrade < 3 or lv_regulatoryGrade > -3 and lv_regulatoryGrade < -2.
+  ex_percent = 15.
+  else.
+  EX_PERCENT = 5.
+endif.
+
+EX_BASICINFO = lv_regulatoryGrade.
+
+endif.
+
+ENDFUNCTION.

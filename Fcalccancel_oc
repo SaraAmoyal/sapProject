@@ -1,0 +1,45 @@
+FUNCTION CALCCANCEL_OC.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_ORDERNUMBER) TYPE  ZORDERNUM_OCA OPTIONAL
+*"  EXPORTING
+*"     VALUE(EX_PERCENT) TYPE  ZPARPERCENT_OC
+*"     VALUE(EX_BASICINFO) TYPE  ZBASICINFO_OC
+*"----------------------------------------------------------------------
+
+data: customer type zid_oca,
+      ordersnum type i,
+      cancelnum type i,
+      part type f.
+
+select custid
+  from zorder6_oc
+  into customer
+  where ordernumber eq iv_ordernumber.
+  endselect.
+
+select count(*)
+  from zorder6_oc
+  where custid eq @customer
+  into @ordersnum.
+
+select count(*)
+  from zorder6_oc
+  where custid eq @customer and status eq 4
+  into @cancelnum.
+
+part = cancelnum / ordersnum.
+
+if part < 1 / 10.
+  EX_PERCENT = 12.
+  elseif part < 3 / 10.
+  EX_PERCENT = 9.
+  else.
+  Ex_PERCENT = 0.
+endif.
+
+EX_BASICINFO = part.
+
+
+ENDFUNCTION.

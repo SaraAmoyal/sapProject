@@ -1,0 +1,35 @@
+FUNCTION ZCALCCHANGESNUM_OC.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_ORDERNUMBER) TYPE  ZORDERNUM_OCA OPTIONAL
+*"  EXPORTING
+*"     VALUE(EX_PERCENT) TYPE  ZPARPERCENT_OC
+*"     VALUE(EX_BASICINFO) TYPE  ZBASICINFO_OC
+*"----------------------------------------------------------------------
+
+data: itemsnum type zcost_oca,
+      changesnum type zchangesnum_oc,
+      part type f.
+
+select itemsnum, changesnum
+  from zorder6_oc
+  into (@itemsnum, @changesnum)
+  where ordernumber eq @iv_ordernumber.
+  endselect.
+
+part = changesnum / itemsnum.
+
+if part < 1 / 5.
+  EX_PERCENT = 10.
+  elseif part < 3 / 10.
+  EX_PERCENT = 8.
+  elseif part < 1 / 2.
+  EX_PERCENT = 3.
+  else.
+  Ex_PERCENT = 0.
+endif.
+
+EX_BASICINFO = changesnum.
+
+ENDFUNCTION.

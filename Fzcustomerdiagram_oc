@@ -1,0 +1,100 @@
+FUNCTION ZCUSTOMERDIAGRAM_OC .
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_CUSTOMERID) TYPE  ZID_OCA OPTIONAL
+*"     VALUE(IV_TYPE) TYPE  ZCOST_OCA OPTIONAL
+*"     VALUE(IV_ORDERNUMBER) TYPE  ZORDERNUM_OCA OPTIONAL
+*"  EXPORTING
+*"     VALUE(ET_DATA) TYPE  ZCUSTOMERDIAGRAMTT_OC
+*"----------------------------------------------------------------------
+
+
+
+data: itab type ZCUSTOMERDIAGRAM_OC,
+      lv_year type char10,
+      lv_mon type char10,
+      lv_sdate type d,
+      lv_edate type d,
+      lv_conf type i,
+      lv_rej type i,
+      lv_mname type string,
+      lv_ordate type d.
+
+*select the order date
+select orderdate
+  from zorder6_oc
+  into lv_ordate
+  where ORDERNUMBER eq IV_ORDERNUMBER.
+  ENDSELECT.
+
+*get the month to start from it
+CALL FUNCTION 'ZGETSTARTMON_OC'
+ EXPORTING
+   IV_ZDATE       = lv_ordate
+ IMPORTING
+   EV_YEAR        = lv_year
+   EV_MONTH       = lv_mon.
+
+
+*get data for 6 last monthes
+lv_sdate+6(2) = '01'.
+lv_edate+6(2) = '31'.
+lv_sdate+0(4) = lv_year.
+lv_edate+0(4) = lv_year.
+
+do 6 times.
+
+lv_mon = lv_mon + 1.
+if lv_mon eq 13.
+  lv_mon = 01.
+  endif.
+lv_sdate+4(2) = lv_mon.
+lv_edate+4(2) = lv_mon.
+
+if lv_mon eq '01'.
+  lv_year = ( conv int4( lv_year ) ) + 1.
+  lv_sdate+0(4) = lv_year.
+  lv_edate+0(4) = lv_year.
+  endif.
+
+if IV_TYPE eq 1.
+select count(*)
+  from zorder6_oc
+  into @lv_conf
+  where orderdate >= @lv_sdate AND orderdate <= @lv_edate and custid = @IV_CUSTOMERID and status eq 2 or status eq 5.
+
+select count(*)
+  from zorder6_oc
+  into @lv_rej
+  where orderdate >= @lv_sdate AND orderdate <= @lv_edate and custid = @IV_CUSTOMERID and status eq 3.
+
+else.
+  select count(*)
+  from zorder6_oc
+  into @lv_conf
+  where orderdate >= @lv_sdate AND orderdate <= @lv_edate and status eq 2 or status eq 5.
+
+select count(*)
+  from zorder6_oc
+  into @lv_rej
+  where orderdate >= @lv_sdate AND orderdate <= @lv_edate and status eq 3.
+
+endif.
+
+select single ktx into lv_mname from T247 where spras = sy-langu and mnr = lv_mon.
+
+
+itab-mandt = '001'.
+itab-id = lv_mon.
+itab-name = lv_mname.
+itab-confirmed = lv_conf.
+itab-rejected = lv_rej.
+
+  append itab to et_data.
+enddo.
+
+
+
+
+ENDFUNCTION.

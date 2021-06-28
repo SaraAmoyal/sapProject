@@ -1,0 +1,41 @@
+FUNCTION ZCALCRATING_OC.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_ORDERNUMBER) TYPE  ZORDERNUM_OCA OPTIONAL
+*"  EXPORTING
+*"     VALUE(EX_EXPORT) TYPE  ZEXPORTCS_OCA
+*"----------------------------------------------------------------------
+
+data rating type i.
+
+select SUM( CAST( parpercent AS INT4 ) )
+  from ZPARAMETERS1_OC
+  into @rating
+  where ORDNUM eq @IV_ORDERNUMBER.
+
+if rating > 94.
+
+  update zorder6_oc
+  set rating = @rating, status = 5, confirmedby = '001'
+  where ORDERNUMBER eq @IV_ORDERNUMBER.
+
+  else.
+
+    update zorder6_oc
+  set rating = @rating
+  where ORDERNUMBER eq @IV_ORDERNUMBER.
+
+  endif.
+
+data:result TYPE LINE OF zexportcs_oca.
+if sy-subrc = 0.
+  result-isok = 1.
+  else.
+   result-isok = 0.
+ endif.
+ append result to EX_EXPORT.
+
+
+
+ENDFUNCTION.

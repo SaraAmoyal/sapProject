@@ -1,0 +1,29 @@
+
+FUNCTION calcseniority_oc.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_ORDERNUMBER) TYPE  ZORDERNUM_OCA OPTIONAL
+*"  EXPORTING
+*"     VALUE(EX_PERCENT) TYPE  ZPARPERCENT_OC
+*"     VALUE(EX_BASICINFO) TYPE  ZBASICINFO_OC
+*"----------------------------------------------------------------------
+
+data seniority type zseniority_oc.
+
+select cu~seniority
+  from zcustomer_oc as cu join zorder6_oc as or
+  on cu~id eq or~custid
+  into seniority
+  where ordernumber eq iv_ordernumber.
+  endselect.
+
+if seniority > 8.
+  Ex_PERCENT = 8.
+  else.
+  Ex_PERCENT = seniority.
+endif.
+
+ex_basicinfo = seniority.
+
+ENDFUNCTION.
